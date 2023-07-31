@@ -1,39 +1,11 @@
-use js_optimizer::{Lexer, Token};
-use std::{fs::File, io::Read, path::Path};
+use js_optimizer::lexer::{Lexer, Token};
+use js_optimizer::parser::{Parser, Statement};
+use std::{
+    fs::File,
+    io::{Read, Write},
+    path::Path,
+};
 
-enum LineType {
-    Init,
-    Assign,
-    Unknown,
-}
-
-struct Line {
-    line_no: u16,
-    tokens: Vec<Token>,
-    line_type: LineType,
-}
-
-impl Line {
-    fn new() -> Self {
-        Self {
-            line_no: 1,
-            tokens: Vec::new(),
-            line_type: LineType::Unknown,
-        }
-    }
-    fn set_type(&mut self, line_type: LineType) {
-        self.line_type = line_type;
-    }
-    fn inc_line_no(&mut self) {
-        self.line_no += 1;
-    }
-    fn set_line_no(&mut self, line_no: u16) {
-        self.line_no = line_no;
-    }
-    fn push_token(&mut self, token: &Token) {
-        self.tokens.push(token.clone());
-    }
-}
 fn main() {
     let start = std::time::Instant::now();
 
@@ -54,23 +26,35 @@ fn main() {
 
     println!("{elapsed:?}");
 
-    let mut lines: Vec<Line> = Vec::new();
+    let mut output_file = File::create("output.js").unwrap();
 
-    let mut line: Line = Line::new();
-    for token in lexer.tokens.iter().peekable() {
-        line.push_token(token);
-        match token {
-            Token::Keyword(k) => {
-                if k == "const" || k == "let" || k == "var" {
-                    line.set_type(LineType::Init);
-                }
-            }
-            Token::Semicolon => {
-                line.push_token(token);
-                lines.push(line);
-                line = Line::new();
-            }
-            _ => unimplemented!(),
-        }
-    }
+    let mut out_buf = String::new();
+
+    // for tok in lexer.tokens.iter() {
+    //     out_buf.push_str(&tok.to_str());
+    // }
+
+    // match output_file.write_all(&out_buf.as_bytes()) {
+    //     Ok(_) => println!("Successfully written to file output.js"),
+    //     Err(err) => println!("ERROR: couldn't write to file: {err}"),
+    // }
+    // let mut lines: Vec<Line> = Vec::new();
+    let parser = Parser::parse_from_lexer(&lexer);
+
+    // for line in lines.iter().peekable() {
+    //     println!("{line:?}");
+    //     match *line.tokens {
+    //         [Token::Const | Token::Let | Token::Var, Token::Identifier(ref id), Token::Equals, Token::Number(ref num), Token::Semicolon] =>
+    //         {
+    //             println!(
+    //                 "[const,Identifier,=,number,semicolon]: {toks:?}",
+    //                 toks = line.tokens
+    //             )
+    //         }
+    //         [Token::Const | Token::Let | Token::Var, ..] => {
+    //             println!("line: [const,..]: {toks:?}", toks = line.tokens)
+    //         }
+    //         _ => {}
+    //     }
+    // }
 }

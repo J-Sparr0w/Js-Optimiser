@@ -13,6 +13,7 @@ else
 enum
 export
 extends
+from
 false
 finally
 for

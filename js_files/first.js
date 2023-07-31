@@ -12,5 +12,8 @@ function add(a, b) {
   return a + b;
 }
 
-const result = add(5, 10);
+const result = add(5.85, -10);
+
+const add_fn = () => {};
+
 console.log(result);
